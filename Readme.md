@@ -1,4 +1,4 @@
-## ETS2 Telemetry Web Server 3.0.5 + Mobile Dashboard
+## ETS2 Telemetry Web Server 3.0.7 + Mobile Dashboard
 
 This is a free Telemetry Web Server for [Euro Truck Simulator 2](http://www.eurotrucksimulator2.com/) written in C# based on WebSockets and REST API. The client side consists of a skinnable HTML5 mobile dashboard application that works in any modern desktop or mobile browser. Android users may also use provided native Android application.   
 
@@ -52,7 +52,7 @@ Here is a screenshot of how your mobile dashboard will look like in a browser:
 
 The package contains other photo realistic skins as well. For example, this is a skin for MAN-TGX:
 
-![](https://raw.githubusercontent.com/Funbit/ets2-telemetry-server/master/server/html/skins/man-tgx/dashboard.jpg)
+![](https://raw.githubusercontent.com/Funbit/ets2-telemetry-server/master/server/Html/skins/man-tgx/dashboard.jpg)
 
 As you can see dashboard design is completely customizable. With some basic knowledge of the HTML and CSS you can create your own skins. See Dashboard skin tutorial below for more information. 
 
@@ -60,7 +60,7 @@ As you can see dashboard design is completely customizable. With some basic know
 
 ### Supported OS
 
-- **Windows Vista, Windows 7 or Windows 8 (32-bit or 64-bit)**. Windows XP is not supported.
+- **Windows Vista, Windows 7, 8 or 10 (32-bit or 64-bit)**. Windows XP is not supported.
 - **.NET Framework 4.5** (pre-installed in Windows 8+). If it is not installed you will be prompted to install it when you run the server. 
 
 ### Supported games
@@ -97,7 +97,7 @@ Also, if you don't trust my compiled ets2-telemetry-server.dll you may compile i
 
 ### Skin Installation
 
-If you downloaded some third-party skin (which is folder, containing dashboard.html, css, js and image files, but **no EXE files**!) you may install it just by **copying to server/html/skins** directory. It should appear in the skin menu as soon as you refresh your browser.
+If you downloaded some third-party skin (which is folder, containing dashboard.html, css, js and image files, but **no EXE files**!) you may install it just by **copying to server/Html/skins** directory. It should appear in the skin menu as soon as you refresh your browser.
 
 ### Upgrade
 
@@ -175,11 +175,20 @@ The tutorial is included in the ZIP package (see "Dashboard Skin Tutorial.pdf").
 
 The ETS2 Telemetry Web Server has evolved into a pretty complex open-source project that requires singificant amount of time to support. If you are interested in its future you may provide the author with some material support by clicking the button below.
 
-[![](https://raw.githubusercontent.com/Funbit/ets2-telemetry-server/master/server/html/images/donate-link.png)](http://funbit.info/ets2/donate.htm)
+[![](https://raw.githubusercontent.com/Funbit/ets2-telemetry-server/master/server/Html/images/donate-link.png)](http://funbit.info/ets2/donate.htm)
 
 Thank you!
 
 ## Version history
+
+### 3.0.7
+
+- Fixed 'Dynamic' skin size display issue.
+
+### 3.0.6
+
+- Fixed minor bug in the telemetry plugin with wrong hshifter.selector usage.
+- Added new 'Dynamic' skin size type, cursor fixes and other refactorings (thanks to denilsonsa & Phil0499!).
 
 ### 3.0.5
 
