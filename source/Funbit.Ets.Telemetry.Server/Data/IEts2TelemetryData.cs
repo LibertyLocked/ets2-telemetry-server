@@ -39,6 +39,11 @@ namespace Funbit.Ets.Telemetry.Server.Data
         bool Connected { get; }
 
         /// <summary>
+        /// Returns the acronym of the currently running game (ETS2, ATS), or null if game name could not be detected.
+        /// </summary>
+        string GameName { get; }
+
+        /// <summary>
         /// Current game time. 
         /// Serializes to ISO 8601 string in JSON.
         /// Example: "0001-01-05T05:11:00Z"
@@ -61,7 +66,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         string Version { get; }
 
         /// <summary>
-        /// When the fatique simulation is disabled, the behavior of this channel
+        /// When the fatigue simulation is disabled, the behavior of this channel
         /// is implementation dependent. The game might provide the value which would
         /// apply if it was enabled or provide no value at all.
         /// Example: "0001-01-01T10:52:00Z"
@@ -322,7 +327,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Average consumption of the adblue in liters/km.
         /// Example: 0
         /// </summary>
-        float AdblueAverageConsumpton { get; }
+        float AdblueAverageConsumption { get; }
         /// <summary>
         /// Pressure of the oil in psi.
         /// Example: 36.4550362
@@ -647,7 +652,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
     public interface IEts2Wheel
     {
         /// <summary>
-        /// Is the wheel physicaly simulated or not.
+        /// Is the wheel physically simulated or not.
         /// </summary>
         bool Simulated { get; }
         /// <summary>

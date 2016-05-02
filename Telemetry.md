@@ -83,6 +83,14 @@ Indicates whether the telemetry server is connected to the simulator (ETS) or no
 		Example: 	true
 		CSS Class: 	game-connected
 
+##### game.gameName
+
+Returns the acronym of the currently running game (ETS2, ATS), or null if game name could not be detected.
+
+		Type: 		string
+		Example: 	"ATS"
+		CSS Class: 	game-gameName
+
 ##### game.paused 
 
 True if game is currently paused, false otherwise.
@@ -477,13 +485,13 @@ AdBlue tank capacity in litres.
 		Example: 	0
 		CSS Class: 	truck-adblueCapacity
 
-##### truck.adblueAverageConsumpton
+##### truck.adblueAverageConsumption
 
 Average consumption of the adblue in liters/km.
 
 		Type: 		float
 		Example: 	0
-		CSS Class: 	truck-adblueAverageConsumpton
+		CSS Class: 	truck-adblueAverageConsumption
 
 ##### truck.adblueWarningOn
 

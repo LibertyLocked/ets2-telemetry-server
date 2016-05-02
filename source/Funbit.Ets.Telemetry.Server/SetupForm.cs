@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
-using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using Funbit.Ets.Telemetry.Server.Helpers;
@@ -28,16 +27,16 @@ namespace Funbit.Ets.Telemetry.Server
             string port = ConfigurationManager.AppSettings["Port"];
             if (Program.UninstallMode)
             {
-                pluginStatusLabel.Text = @"Uninstall ETS2 telemetry plugin DLL";
-                firewallStatusLabel.Text = string.Format(@"Delete firewall rule for {0} port", port);
-                urlReservationStatusLabel.Text = string.Format(@"Delete ACL rule for http://+:{0}/", port);
+                pluginStatusLabel.Text = @"Uninstall ETS2/ATS telemetry plugin DLL";
+                firewallStatusLabel.Text = $@"Delete firewall rule for {port} port";
+                urlReservationStatusLabel.Text = $@"Delete ACL rule for http://+:{port}/";
                 okButton.Text = @"Uninstall";
             }
             else
             {
-                pluginStatusLabel.Text = @"Install ETS2 telemetry plugin DLL";
-                firewallStatusLabel.Text = string.Format(@"Add firewall rule for {0} port", port);
-                urlReservationStatusLabel.Text = string.Format(@"Add ACL rule for http://+:{0}/", port);
+                pluginStatusLabel.Text = @"Install ETS2/ATS telemetry plugin DLL";
+                firewallStatusLabel.Text = $@"Add firewall rule for {port} port";
+                urlReservationStatusLabel.Text = $@"Add ACL rule for http://+:{port}/";
                 okButton.Text = @"Install";
             }
         }
@@ -76,7 +75,7 @@ namespace Funbit.Ets.Telemetry.Server
             if (Ets2ProcessHelper.IsEts2Running)
             {
                 MessageBox.Show(this,
-                    @"In order to proceed the ETS2 game must not be running." + Environment.NewLine +
+                    @"In order to proceed the ETS2/ATS game must not be running." + Environment.NewLine +
                     @"Please exit the game and try again.", @"Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 DialogResult = DialogResult.Abort;
                 return;

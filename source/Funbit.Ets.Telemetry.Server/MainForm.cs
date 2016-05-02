@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using Funbit.Ets.Telemetry.Server.Controllers;
 using Funbit.Ets.Telemetry.Server.Data;
@@ -20,7 +20,13 @@ namespace Funbit.Ets.Telemetry.Server
         IDisposable _server;
         static readonly log4net.ILog Log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        readonly HttpClient _broadcastHttpClient = new HttpClient();
+        static readonly Encoding Utf8 = new UTF8Encoding(false);
         static readonly string BroadcastUrl = ConfigurationManager.AppSettings["BroadcastUrl"];
+        static readonly string BroadcastUserId = Convert.ToBase64String(
+            Utf8.GetBytes(ConfigurationManager.AppSettings["BroadcastUserId"] ?? ""));
+        static readonly string BroadcastUserPassword = Convert.ToBase64String(
+            Utf8.GetBytes(ConfigurationManager.AppSettings["BroadcastUserPassword"] ?? ""));
         static readonly int BroadcastRateInSeconds = Math.Min(Math.Max(1, 
             Convert.ToInt32(ConfigurationManager.AppSettings["BroadcastRate"])), 86400);
         static readonly bool UseTestTelemetryData = Convert.ToBoolean(
@@ -33,7 +39,7 @@ namespace Funbit.Ets.Telemetry.Server
 
         static string IpToEndpointUrl(string host)
         {
-            return string.Format("http://{0}:{1}", host, ConfigurationManager.AppSettings["Port"]);
+            return $"http://{host}:{ConfigurationManager.AppSettings["Port"]}";
         }
 
         void Setup()
@@ -91,6 +97,8 @@ namespace Funbit.Ets.Telemetry.Server
                 // turn on broadcasting if set
                 if (!string.IsNullOrEmpty(BroadcastUrl))
                 {
+                    _broadcastHttpClient.DefaultRequestHeaders.Add("X-UserId", BroadcastUserId);
+                    _broadcastHttpClient.DefaultRequestHeaders.Add("X-UserPassword", BroadcastUserPassword);
                     broadcastTimer.Interval = BroadcastRateInSeconds * 1000;
                     broadcastTimer.Enabled = true;
                 }
@@ -108,7 +116,7 @@ namespace Funbit.Ets.Telemetry.Server
             }
         }
         
-        private void MainForm_Load(object sender, EventArgs e)
+        void MainForm_Load(object sender, EventArgs e)
         {
             // log current version for debugging
             Log.InfoFormat("Running application on {0} ({1}) {2}", Environment.OSVersion, 
@@ -123,24 +131,23 @@ namespace Funbit.Ets.Telemetry.Server
             Start();
         }
 
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (_server != null)
-                _server.Dispose();
+            _server?.Dispose();
             trayIcon.Visible = false;
         }
     
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void trayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        void trayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             WindowState = FormWindowState.Normal;
         }
 
-        private void statusUpdateTimer_Tick(object sender, EventArgs e)
+        void statusUpdateTimer_Tick(object sender, EventArgs e)
         {
             try
             {
@@ -151,12 +158,12 @@ namespace Funbit.Ets.Telemetry.Server
                 } 
                 else if (Ets2ProcessHelper.IsEts2Running && Ets2TelemetryDataReader.Instance.IsConnected)
                 {
-                    statusLabel.Text = @"Connected to the simulator";
+                    statusLabel.Text = $"Connected to the simulator ({Ets2ProcessHelper.LastRunningGameName})";
                     statusLabel.ForeColor = Color.DarkGreen;
                 }
                 else if (Ets2ProcessHelper.IsEts2Running)
                 {
-                    statusLabel.Text = @"Simulator is running";
+                    statusLabel.Text = $"Simulator is running ({Ets2ProcessHelper.LastRunningGameName})";
                     statusLabel.ForeColor = Color.Teal;
                 }
                 else
@@ -173,27 +180,27 @@ namespace Funbit.Ets.Telemetry.Server
             }
         }
 
-        private void apiUrlLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        void apiUrlLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ProcessHelper.OpenUrl(((LinkLabel)sender).Text);
         }
 
-        private void appUrlLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        void appUrlLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ProcessHelper.OpenUrl(((LinkLabel)sender).Text);
         }
         
-        private void MainForm_Resize(object sender, EventArgs e)
+        void MainForm_Resize(object sender, EventArgs e)
         {
             ShowInTaskbar = WindowState != FormWindowState.Minimized;
             if (!ShowInTaskbar && trayIcon.Tag == null)
             {
-                trayIcon.ShowBalloonTip(1000, @"ETS2 Telemetry Server", @"Double-click to restore.", ToolTipIcon.Info);
+                trayIcon.ShowBalloonTip(1000, @"ETS2/ATS Telemetry Server", @"Double-click to restore.", ToolTipIcon.Info);
                 trayIcon.Tag = "Already shown";
             }
         }
 
-        private void interfaceDropDown_SelectedIndexChanged(object sender, EventArgs e)
+        void interfaceDropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedInterface = (NetworkInterfaceInfo) interfacesDropDown.SelectedItem;
             appUrlLabel.Text = IpToEndpointUrl(selectedInterface.Ip) + Ets2AppController.TelemetryAppUriPath;
@@ -203,13 +210,12 @@ namespace Funbit.Ets.Telemetry.Server
             Settings.Instance.Save();
         }
 
-        private async void broadcastTimer_Tick(object sender, EventArgs e)
+        async void broadcastTimer_Tick(object sender, EventArgs e)
         {
             try
             {
                 broadcastTimer.Enabled = false;
-                using (var client = new HttpClient())
-                    await client.PostAsJsonAsync(BroadcastUrl, Ets2TelemetryDataReader.Instance.Read());
+                await _broadcastHttpClient.PostAsJsonAsync(BroadcastUrl, Ets2TelemetryDataReader.Instance.Read());
             }
             catch (Exception ex)
             {
@@ -217,10 +223,34 @@ namespace Funbit.Ets.Telemetry.Server
             }
             broadcastTimer.Enabled = true;
         }
+        
+        void uninstallToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string exeFileName = Process.GetCurrentProcess().MainModule.FileName;
+            var startInfo = new ProcessStartInfo
+            {
+                Arguments = $"/C ping 127.0.0.1 -n 2 && \"{exeFileName}\" -uninstall",
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                FileName = "cmd.exe"
+            };
+            Process.Start(startInfo);
+            Application.Exit();
+        }
 
-        private void helpLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        void donateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ProcessHelper.OpenUrl("http://funbit.info/ets2/donate.htm");
+        }
+
+        void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ProcessHelper.OpenUrl("https://github.com/Funbit/ets2-telemetry-server");
+        }
+
+        void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO: implement later
         }
     }
 }

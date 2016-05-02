@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -10,12 +9,12 @@ namespace Funbit.Ets.Telemetry.Server
     static class Program
     {
         [DllImport("kernel32.dll", EntryPoint = "CreateMutexA")]
-        private static extern int CreateMutex(Int32 lpMutexAttributes, int bInitialOwner, string lpName);
+        private static extern int CreateMutex(int lpMutexAttributes, int bInitialOwner, string lpName);
         [DllImport("kernel32.dll")]
         private static extern int GetLastError();
         private const int ErrorAlreadyExists = 183;
 
-        public static bool UninstallMode = false;
+        public static bool UninstallMode;
 
         /// <summary>
         /// The main entry point for the application.
@@ -31,7 +30,7 @@ namespace Funbit.Ets.Telemetry.Server
             bool bAnotherInstanceRunning = GetLastError() == ErrorAlreadyExists;
             if (bAnotherInstanceRunning)
             {
-                MessageBox.Show(@"Another ETS2 Telemetry Server instance is already running!", @"Warning",
+                MessageBox.Show(@"Another ETS2/ATS Telemetry Server instance is already running!", @"Warning",
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
